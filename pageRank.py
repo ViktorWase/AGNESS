@@ -138,7 +138,7 @@ def tournament(AIs, rules):
         for j in range(len(opponents)):
             win = playGame([AIs[i], AIs[opponents[j]]], rules)
             gameCounter = gameCounter + 1
-            print (gameCounter*100)/nrGames,
+            print int((gameCounter*100)/nrGames),
             print "%,",
             #print win
             if(win == 2):

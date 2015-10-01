@@ -3,7 +3,7 @@ from random import randint
 from random import gauss
 import random
 #from tictactoeRules import *
-from ultimatetictactoeRules import *
+from parameters import *
 from copy import copy
 from math import sqrt
 from math import log
@@ -258,7 +258,7 @@ class montePlayer:
         return list(self.root.field)
 
     def spawnChild(self):
-        sigma = self.sigma +random.gauss(0.0,self.sigma/2)
+        sigma = self.sigma + random.gauss(0.0,self.sigma/2.0)
         c = self.c + random.gauss(0, self.sigma)
         tmp_w = list(self.w)
         for i in range(len(tmp_w)):
