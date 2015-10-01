@@ -1,4 +1,8 @@
-class Tictactoe:
+"""
+    The rules for tic-tac-toe.
+"""
+
+class Rules:
     def __init__(self, playerNr_in):
         self.playerNr = playerNr_in
 
@@ -11,7 +15,7 @@ class Tictactoe:
 
     def getPlayerList(self):
         return [1,2]
-    
+
     def nextPlayer(self):
         if(self.playerNr == 1):
             self.playerNr = 2
@@ -22,7 +26,7 @@ class Tictactoe:
             return 2
         else:
             return 1
-        
+
     def makeMove(self, field, n, player):
         field[n] = player
         return field
@@ -43,27 +47,27 @@ class Tictactoe:
                     break
                 if(j==2):
                     return True
-            
+
         for i in range(3):
             for j in range(3):
                 if(f[j][i] != self.playerNr):
                     break
                 if(j==2):
                     return True
-        
+
         for i in range(3):
             if(f[i][i] != self.playerNr ):
                 break
             if(i==2):
                 return True
-        
+
         for i in range(3):
             if(f[i][2-i] != self.playerNr ):
                 break
             if(i==2):
                 return True
         return False
-    
+
     def hasLost(self, field):
         f = [[0 for x in range(3)] for y in range(3)]
         counter = 0
@@ -81,20 +85,20 @@ class Tictactoe:
                     break
                 if(j==2):
                     return True
-            
+
         for i in range(3):
             for j in range(3):
                 if(f[j][i] != opponentNr):
                     break
                 if(j==2):
                     return True
-        
+
         for i in range(3):
             if(f[i][i] != opponentNr):
                 break
             if(i==2):
                 return True
-        
+
         for i in range(3):
             if(f[i][2-i] != opponentNr):
                 break
