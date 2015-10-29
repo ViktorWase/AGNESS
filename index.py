@@ -25,7 +25,7 @@ def ADHOC(ais):
     for ai in ais:
         error = error + (ai.c-1.4142135623730951)*(ai.c-1.4142135623730951)
     return error/len(ais)
-    
+
 def ADHOC2(ais):
     bestVal = 10000000.0
     for ai in ais:
@@ -55,8 +55,6 @@ def EVOLUTION_BITCH(AIs, rules, numberOfGenerations):
 def AIdist(AIs):
     n = float(len(AIs[0].w))
 
-    #n = 652
-    #n=44
     meanVar = 0.0
     for i in range(int(n)):
         tmp = 0.0
@@ -110,14 +108,21 @@ p10 = montePlayer(w10,c10,random.random(), 1, r1)
 
 AIs = [p1,p2,p3,p4,p5,p6,p7,p8,p9,p10]
 
-a = EVOLUTION_BITCH(AIs,r1,30)
-for ai in a:
+output = EVOLUTION_BITCH(AIs,r1,30)
+
+print output[0].w
+print output[0].c
+print output[0].sigma
+
+"""
+for ai in output:
     print ai.w
 print "\n"
-for ai in a:
+for ai in output:
     print ai.c
-for ai in a:
+for ai in output:
     print ai.sigma
+"""
 
 print "Press any key to quit."
 input()
