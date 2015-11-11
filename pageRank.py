@@ -138,7 +138,95 @@ def tournament(AIs, rules):
         for j in range(len(opponents)):
             win = playGame([AIs[i], AIs[opponents[j]]], rules)
             gameCounter = gameCounter + 1
-            print int((gameCounter*100)/nrGames),
+            print (gameCounter*100)/nrGames,
+            print "%,",
+            #print win
+            if(win == 2):
+                winMatrix[opponents[j]][i] = winMatrix[opponents[j]][i] + 1
+            elif(win == 1):
+                winMatrix[i][opponents[j]] = winMatrix[i][opponents[j]] + 1
+    survivours = findSurvivours(winMatrix, n)
+    return survivours
+
+def errorOfBoardEval(player, boardEvalObj):
+    """
+        Uses
+    """
+    node = player.root
+    error = 0.0
+    for i in range(10):
+        error += boardEvalObj.generalFuncBoardEval(node)
+        if node.parent != None:
+            node = node.parent
+        else:
+            break
+    return error
+
+def evolveBoardEval(player):
+    currentError = player.boardEvalObj.errorOfBoardEval(player)
+
+    boardEvalObj = player.boardEvalObj.returnCopy()
+    boardEvalObj.mutate()
+    errorOfMutatedObj = boardEvalObj
+
+
+
+def playGameWithGeneralBoardEvaluationEvolution(AIs, rules, evoIter):
+    """
+        This is the same as playGame() but slower since it
+        calculates the vector of the deep ANN that evaluates
+        the board.
+    """
+    rules = copy(rules)
+    f = rules.getNewBoard()
+    AIs[0].playerNr = 1
+    AIs[1].playerNr = 2
+    AIs[0].resetPlayer()
+    AIs[1].resetPlayer()
+    rules.playerNr = 1
+    while(1):
+        for p in AIs:
+            f = p.makeAMove(f)
+            for i in range(evoIter):
+                evolveBoardEval(p)
+            #printField(f)
+            if(rules.isOver(f)):
+                #print f
+                if(rules.hasWon(f)):
+                    #print "WON!"
+                    return p.playerNr
+                elif(rules.hasLost(f)):
+                    #print "LOST!"
+                    return p.rules.otherPlayerNr()
+                elif(rules.isDraw(f)):
+                    #print "draw!"
+                    return 0
+                else:
+                    return "oopsie"
+            rules.nextPlayer()
+
+def tournamentWithGeneralBoardEvaluationEvolution(AIs, rules, iterationsForBoardEvaluationEvolution):
+    """
+        This is the same as tournament() but slower since it
+        calculates the vector of the deep ANN that evaluates
+        the board.
+    """
+    n = len(AIs)
+    winMatrix = [[0 for col in range(n)] for row in range(n)]
+    N = math.floor(1.5*math.log(n))+1
+    gameCounter = 0
+    nrGames = N*n
+
+    for i in range(n):
+        ind = range(n)
+        ind.pop(i)
+        opponents = []
+        for j in range(int(N)):
+            opponents.append(ind.pop(randint(0,n-1-1-j)))
+        for j in range(len(opponents)):
+            win = playGameWithGeneralBoardEvaluationEvolution([AIs[i], AIs[opponents[j]]], rules, iterationsForBoardEvaluationEvolution)
+            gameCounter = gameCounter + 1
+            print (gameCounter*100)/nrGames,
             print "%,",
             #print win
             if(win == 2):
