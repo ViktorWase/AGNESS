@@ -1,9 +1,41 @@
 from parameters import *
 
+import multiprocessing
+
 from monteCarloPlayer import *
 from pageRank import *
 from random import *
 import random
+
+
+def morphAnnList2(AIs,surviving):
+    """
+        Takes the top half of the ANNs and gives
+        them 2 children each.
+    """
+    #surviving = findTheMostFit(AIs,winCounterList)
+    new_generation_ann = []
+    ann_nr = 0
+    for ann_nr in surviving:
+            child = AIs[ann_nr].spawnChild()
+            new_generation_ann.append(child)
+            new_generation_ann.append(AIs[ann_nr])
+    random.shuffle(new_generation_ann)
+    return new_generation_ann
+
+def writeToFile(fileName, AIs):
+    text_file = open(fileName, "w")
+    string =""
+    for ai in AIs:
+        string=string+str(ai.w)+"\n"
+    string=string+"\n"
+    for ai in AIs:
+        string=string+str(ai.c)+"\n"
+    string=string+"\n"
+    for ai in AIs:
+        string=string+str(ai.sigma)+"\n"
+    text_file.write(string)
+    text_file.close()
 
 def morphAnnList(AIs,winCounterList):
     """
@@ -33,7 +65,7 @@ def ADHOC2(ais):
             bestVal = abs(ai.c-1.4142135623730951)
     return bestVal
 
-def EVOLUTION_BITCH(AIs, rules, numberOfGenerations):
+def EVOLUTION_BITCH(AIs, rules, numberOfGenerations, numberOfCores = multiprocessing.cpu_count()):
     for gen in range(numberOfGenerations):
         error = ADHOC(AIs)
         print('\nGeneration: '),
@@ -45,7 +77,11 @@ def EVOLUTION_BITCH(AIs, rules, numberOfGenerations):
         print "Smallest error in 1-norm: ",
         smallestError = ADHOC2(AIs)
         print smallestError
-        winList = tournament(AIs, rules)
+        if(gen % 3 == 0):
+            print "Saving"
+            name = "ParametersForFrac_"+str(gen)
+            writeToFile(name,AIs)
+        winList = tournament(AIs, rules,numberOfCores)
 
         if(gen != numberOfGenerations -1):
             nextGenAI = morphAnnList2(AIs,winList)
@@ -72,17 +108,26 @@ def AIdist(AIs):
 r1 = Rules(1)
 
 NN = 74
+AIs = []
 
-w1 = [random.random() for col in range(NN)]
-w2 = [random.random() for col in range(NN)]
-w3 = [random.random() for col in range(NN)]
-w4 = [random.random() for col in range(NN)]
-w5 = [random.random() for col in range(NN)]
-w6 = [random.random() for col in range(NN)]
-w7 = [random.random() for col in range(NN)]
-w8 = [random.random() for col in range(NN)]
-w9 = [random.random() for col in range(NN)]
-w10 = [random.random() for col in range(NN)]
+for i in range(24):
+    w = [random.random()-0.5 for col in range(NN)]
+    c = random.random()*5.0
+    p = montePlayer(w,c,random.random(), 1, copy(r1))
+    AIs.append(p)
+
+
+"""
+w1 = [random.random()-0.5 for col in range(NN)]
+w2 = [random.random()-0.5 for col in range(NN)]
+w3 = [random.random()-0.5 for col in range(NN)]
+w4 = [random.random()-0.5 for col in range(NN)]
+w5 = [random.random()-0.5 for col in range(NN)]
+w6 = [random.random()-0.5 for col in range(NN)]
+w7 = [random.random()-0.5 for col in range(NN)]
+w8 = [random.random()-0.5 for col in range(NN)]
+w9 = [random.random()-0.5 for col in range(NN)]
+w10 = [random.random()-0.5 for col in range(NN)]
 
 c1 = random.random()*5
 c2 = random.random()*5
@@ -107,6 +152,10 @@ p9 = montePlayer(w9,c9,random.random(), 1, r1)
 p10 = montePlayer(w10,c10,random.random(), 1, r1)
 
 AIs = [p1,p2,p3,p4,p5,p6,p7,p8,p9,p10]
+"""
+print "You are running on a maximum of",
+print multiprocessing.cpu_count(),
+print "cores."
 
 output = EVOLUTION_BITCH(AIs,r1,30)
 

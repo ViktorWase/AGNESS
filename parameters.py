@@ -1,2 +1,2 @@
 
-from tictactoeRules import *
+from ultimatetictactoeRules import *

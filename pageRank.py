@@ -1,3 +1,6 @@
+from multiprocessing import Pool
+
+
 import math
 from random import *
 from copy import copy
@@ -122,10 +125,18 @@ def playGame(AIs, rules):
                     return "oopsie"
             rules.nextPlayer()
 
-def tournament(AIs, rules):
+def tournament(AIs, rules, numberOfCores):
     n = len(AIs)
     winMatrix = [[0 for col in range(n)] for row in range(n)]
-    N = math.floor(1.5*math.log(n))+0
+    N = math.floor(1.5*math.log(n))+1
+
+    #Make sure that the number of matches is a multiple of the number of cores.
+    #N = math.ceil(N*numberOfCores)/numberOfCores
+    N = numberOfCores
+    #But it shouldn't exceed n-1
+    #N = min(N,n-1)
+    print N
+
     gameCounter = 0
     nrGames = N*n
 
@@ -135,15 +146,34 @@ def tournament(AIs, rules):
         opponents = []
         for j in range(int(N)):
             opponents.append(ind.pop(randint(0,n-1-1-j)))
-        for j in range(len(opponents)):
-            win = playGame([AIs[i], AIs[opponents[j]]], rules)
-            gameCounter = gameCounter + 1
-            print int((gameCounter*100)/nrGames),
-            print "%,",
-            #print win
-            if(win == 2):
-                winMatrix[opponents[j]][i] = winMatrix[opponents[j]][i] + 1
-            elif(win == 1):
-                winMatrix[i][opponents[j]] = winMatrix[i][opponents[j]] + 1
+        oppCount = 0
+        #for j in range(int(math.round(N/numberOfCores))):
+        for j in range(1):
+            #Starts a parallel pool of workers, that plays games async-ly.
+            #multiprocessing.freeze_support()
+            pool = Pool(processes=numberOfCores)
+            resultArray = [None]*numberOfCores
+            ansArray = [None]* numberOfCores
+            for core in range(numberOfCores):
+                resultArray[core] = pool.apply_async(playGame, [[copy(AIs[i]), copy(AIs[opponents[oppCount]])], copy(rules)])
+                oppCount = oppCount + 1
+            for core in range(numberOfCores):
+                ansArray[core] = resultArray[core].get(timeout=60*60) #If nothing has happend after an hour, something is wrong.
+            print ansArray
+
+            #win = playGame([copy(AIs[i]), copy(AIs[opponents[j]]]), copy(rules))
+            for core in range(numberOfCores):
+                win = ansArray[core]
+                gameCounter = gameCounter + 1
+                print int((gameCounter*100)/nrGames),
+                print "%,",
+                #print win
+                if(win == 2):
+                    winMatrix[opponents[j]][i] = winMatrix[opponents[j]][i] + 1
+                elif(win == 1):
+                    winMatrix[i][opponents[j]] = winMatrix[i][opponents[j]] + 1
+                elif(win != 0):
+                    print "BIG ERROR IN THE PARALLELIZATION!"
+                    print ansArray
     survivours = findSurvivours(winMatrix, n)
     return survivours
