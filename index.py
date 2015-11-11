@@ -5,6 +5,36 @@ from pageRank import *
 from random import *
 import random
 
+
+def morphAnnList2(AIs,surviving):
+    """
+        Takes the top half of the ANNs and gives
+        them 2 children each.
+    """
+    #surviving = findTheMostFit(AIs,winCounterList)
+    new_generation_ann = []
+    ann_nr = 0
+    for ann_nr in surviving:
+            child = AIs[ann_nr].spawnChild()
+            new_generation_ann.append(child)
+            new_generation_ann.append(AIs[ann_nr])
+    random.shuffle(new_generation_ann)
+    return new_generation_ann
+
+def writeToFile(fileName, AIs):
+    text_file = open(fileName, "w")
+    string =""
+    for ai in AIs:
+        string=string+str(ai.w)+"\n"
+    string=string+"\n"
+    for ai in AIs:
+        string=string+str(ai.c)+"\n"
+    string=string+"\n"
+    for ai in AIs:
+        string=string+str(ai.sigma)+"\n"
+    text_file.write(string)
+    text_file.close()
+
 def morphAnnList(AIs,winCounterList):
     """
         Takes the top half of the ANNs and gives
