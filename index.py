@@ -65,7 +65,7 @@ def ADHOC2(ais):
             bestVal = abs(ai.c-1.4142135623730951)
     return bestVal
 
-def EVOLUTION_BITCH(AIs, rules, numberOfGenerations, numberOfCores = multiprocessing.cpu_count()):
+def EVOLUTION_BITCH(AIs, rules, numberOfGenerations, numberOfCores = multiprocessing.cpu_count()-1):
     for gen in range(numberOfGenerations):
         error = ADHOC(AIs)
         print('\nGeneration: '),

@@ -159,7 +159,7 @@ def tournament(AIs, rules, numberOfCores):
                 oppCount = oppCount + 1
             for core in range(numberOfCores):
                 ansArray[core] = resultArray[core].get(timeout=60*60) #If nothing has happend after an hour, something is wrong.
-            print ansArray
+            #print ansArray
 
             #win = playGame([copy(AIs[i]), copy(AIs[opponents[j]]]), copy(rules))
             for core in range(numberOfCores):
