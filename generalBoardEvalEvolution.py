@@ -57,12 +57,12 @@ class boardEval:
             of winning as a float between 0 (losing) and
             1 (winning)
         """
-        board = list(boardIn)
+        board = list(boardIn) #The list()-part might not be nessecary. FIX!
 
         #Call the Artificial Neural Network
         out = generalFuncANN(board, self.vec, self.dimOfAnn, self.func)
-        #Normalize to the interval [0, 1]
-        out = exp(out) / (1.0 + exp(out))
+        #Normalize to the interval [0, 1]. (isnät it already normalized?)
+        #out = exp(out) / (1.0 + exp(out))
 
         return out
 
@@ -73,7 +73,7 @@ class boardEval:
         trueVal = ANN([float(montePlayer.wins), float(motePlayer.losses), float(motePlayer.draws)],3,[5, 5,4],self.w, True)
         output = (trueVal-annResult)*(trueVal-annResult)
         return output
-
+"""
 board = [0]*9
 board[2] = 1
 v = [(random()-0.5)*20]*530
@@ -85,3 +85,4 @@ chance = B.eval(board)
 print board
 
 print chance
+"""
