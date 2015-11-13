@@ -160,12 +160,13 @@ def tournament(AIs, rules, numberOfCores):
             for core in range(numberOfCores):
                 ansArray[core] = resultArray[core].get(timeout=60*60) #If nothing has happend after an hour, something is wrong.
             #print ansArray
-
+            pool.close()
+            pool.join()
             #win = playGame([copy(AIs[i]), copy(AIs[opponents[j]]]), copy(rules))
             for core in range(numberOfCores):
                 win = ansArray[core]
                 gameCounter = gameCounter + 1
-                print int((gameCounter*100)/nrGames),
+                print float(int((gameCounter*1000)/nrGames),10.0),
                 print "%,",
                 #print win
                 if(win == 2):
