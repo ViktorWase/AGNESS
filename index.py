@@ -15,9 +15,9 @@ def morphAnnList2(AIs,surviving):
     new_generation_ann = []
     ann_nr = 0
     for ann_nr in surviving:
-            child = AIs[ann_nr].spawnChild()
-            new_generation_ann.append(child)
-            new_generation_ann.append(AIs[ann_nr])
+        child = AIs[ann_nr].spawnChild()
+        new_generation_ann.append(child)
+        new_generation_ann.append(AIs[ann_nr])
     random.shuffle(new_generation_ann)
     return new_generation_ann
 
