@@ -2,33 +2,6 @@ import math
 from random import *
 from copy import copy
 
-def printField(f):
-    for i in range(3):
-        for j in range(3):
-            for k in range(3):
-                print f[i*3 + j * 9 + k],
-            print "|",
-        print "\n",
-        if(i==2 or i==5):
-            print "------------------"
-    for i in range(3):
-        for j in range(3):
-            for k in range(3):
-                print f[27+i*3 + j * 9 + k],
-            print "|",
-        print "\n",
-        if(i==2 or i==5):
-            print "------------------"
-    for i in range(3):
-        for j in range(3):
-            for k in range(3):
-                print f[6*9+i*3 + j * 9 + k],
-            print "|",
-        print "\n",
-        if(i==2 or i==5):
-            print "------------------"
-
-
 def matMult(A,B, n):
     C = [[0.0 for col in range(n)] for row in range(n)]
     su = 0
@@ -125,7 +98,7 @@ def playGame(AIs, rules):
 def tournament(AIs, rules):
     n = len(AIs)
     winMatrix = [[0 for col in range(n)] for row in range(n)]
-    N = math.floor(1.5*math.log(n))+0
+    N = math.floor(1.5*math.log(n))+1
     gameCounter = 0
     nrGames = N*n
 
@@ -150,12 +123,15 @@ def tournament(AIs, rules):
 
 def errorOfBoardEval(player, boardEvalObj):
     """
-        Uses
+        Calculates the error of the current boardEvalObj.
+        Uses the boards from the played game (and some
+        close children) when doing this.
     """
     node = player.root
     error = 0.0
     for i in range(10):
-        error += boardEvalObj.generalFuncBoardEval(node)
+        for child in node.children:
+            error += boardEvalObj.errorFuncBoardEval(child)
         if node.parent != None:
             node = node.parent
         else:
@@ -163,11 +139,16 @@ def errorOfBoardEval(player, boardEvalObj):
     return error
 
 def evolveBoardEval(player):
+    """
+        Uses a simple evolutionary algorithm to
+        progress the quality of the boardEval object
+    """
     currentError = player.boardEvalObj.errorOfBoardEval(player)
-
-    boardEvalObj = player.boardEvalObj.returnCopy()
-    boardEvalObj.mutate()
-    errorOfMutatedObj = boardEvalObj
+    boardEvalObjMut = player.boardEvalObj.returnCopy()
+    boardEvalObjMut.mutate()
+    errorOfMutatedObj = boardEvalObjMut.errorOfBoardEval(player)
+    if errorOfMutatedObj < currentError:
+        player.boardEvalObj = boardEvalObjMut
 
 
 

@@ -67,11 +67,10 @@ class boardEval:
         return out
 
     def errorFuncBoardEval(self, montePlayer):
-        board = monteplayer.root.field
+        board = montePlayer.root.field
         annResult = self.eval(board)
         #Normalize the output from the exploration
-        trueVal =(montePlayer.root.wins-montePlayer.root.losses)/(float(montePlayer.root.wins)+montePlayer.root.losses+montePlayer.root.draws)
-        trueVal = (trueVal+1.0)/2.0
+        trueVal = ANN([float(montePlayer.wins), float(motePlayer.losses), float(motePlayer.draws)],3,[5, 5,4],self.w, True)
         output = (trueVal-annResult)*(trueVal-annResult)
         return output
 
