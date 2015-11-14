@@ -101,7 +101,7 @@ def AIdist(AIs):
 
 r1 = Rules(1)
 
-NN = 74
+NN = 90
 
 w1 = [random.random() for col in range(NN)]
 w2 = [random.random() for col in range(NN)]

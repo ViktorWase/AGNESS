@@ -15,7 +15,7 @@ def shift(l, n):
     return l2[n:] + l2[:n]
 
 class monteNode:
-    def __init__(self, parent, field, playerNr, rules,c):
+    def __init__(self, parent, field, playerNr, rules,c, moveNr):
         self.parent = parent
         self.playerNr = playerNr
         self.field = list(field)
@@ -26,6 +26,7 @@ class monteNode:
         self.c = c
         self.rules = copy(rules)
         self.rules.playerNr = playerNr #IIIIIIIIIINTE HELT HUNDRA P� DEN H�R RADEN!
+        self.moveNr = moveNr
         self.children = [None]*len(rules.returnAllLegalMoves(field))
 
     def pickExploreNode(self, nodeIndependentPlayerNr):
@@ -97,7 +98,7 @@ class monteNode:
             newRules = copy(self.rules)
             newRules.playerNr = self.rules.otherPlayerNr()
 
-            self.children[r] = monteNode(self, list(field), newRules.playerNr, newRules, self.c)
+            self.children[r] = monteNode(self, list(field), newRules.playerNr, newRules, self.c, self.moveNr+1)
             w = self.children[r].simulateRandomGame(nodeIndependentPlayerNr)
             if(w == 1):
                 self.backPropagation(1)
@@ -188,7 +189,7 @@ class montePlayer:
     """
     def __init__(self, w,c,sigma, playerNr, rules):
         self.field = rules.getNewBoard()
-        self.root = monteNode(None, list(self.field), 1, copy(rules),c)
+        self.root = monteNode(None, list(self.field), 1, copy(rules),c,0)
         self.playerNr = playerNr
         self.rules = copy(rules)
         self.rules.playerNr = playerNr
@@ -205,7 +206,7 @@ class montePlayer:
     def resetPlayer(self):
         self.rules.playerNr = self.playerNr
         self.field = self.rules.getNewBoard()
-        self.root = monteNode(None, list(self.field), 1, copy(self.rules),self.c)
+        self.root = monteNode(None, list(self.field), 1, copy(self.rules),self.c,0)
         if(self.playerNr != 1): #INTE HELT HUNDRA P� DEN H�R IF-SATSEN!
             for i in range(len(self.root.children)):
                 self.root.explore(self.playerNr)
@@ -227,7 +228,7 @@ class montePlayer:
         if(foundIt == False):
             print "Didn't find the node. If this happens a lot it's gonna be a problem"
             tmpRules = copy(self.rules)
-            self.root = monteNode(None, list(field), self.playerNr, tmpRules,self.c)
+            self.root = monteNode(None, list(field), self.playerNr, tmpRules,self.c, self.root.moveNr+1)
 
         else:
             self.root = self.root.children[counter]
@@ -257,7 +258,7 @@ class montePlayer:
         counter = 0
         for child in self.root.children:
             if(child != None):
-                val = ANN([float(child.wins), float(child.losses), float(child.draws)],3,[5, 5,4],self.w, True)
+                val = ANN([float(child.wins), float(child.losses), float(child.draws), float(child.moveNr)],3,[6, 5,4],self.w, True)
                 if(val>=bestVal):
                     bestVal = val
                     bestMoveNr = counter
