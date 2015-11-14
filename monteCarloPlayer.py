@@ -28,10 +28,15 @@ class monteNode:
         self.rules.playerNr = playerNr #IIIIIIIIIINTE HELT HUNDRA P� DEN H�R RADEN!
         self.children = [None]*len(rules.returnAllLegalMoves(field))
 
-    def pickExploreNode(self):
+    def pickExploreNode(self, nodeIndependentPlayerNr):
         counter = 0
-        bestVal = -1
-        bestIndex = 0
+
+        if nodeIndependentPlayerNr == self.playerNr:
+            bestVal = -1
+            bestIndex = 0
+        else:
+            bestVal = 1
+            bestIndex = 0
         totalSimulations = 0
         for child in self.children:
             if(child == None):
@@ -44,8 +49,12 @@ class monteNode:
             n = child.wins+child.losses+child.draws
             if n == 0:
                 return counter
+            #This function HAS GOT TO CHANGE. It works and all, but could
+            #probably be improved with an ANN or some GEP.
             tmp = float(child.wins)/n+ self.c*sqrt(log(totalSimulations)/n)
-            if tmp >= bestVal:
+            #Make the move that's best if it's your turn, otherwise you make the
+            #move that's worst for you. (Minimax as it's called.)
+            if (tmp >= bestVal and nodeIndependentPlayerNr == self.playerNr) or ((tmp < bestVal and nodeIndependentPlayerNr != self.playerNr)):
                 bestVal = tmp
                 bestIndex = counter
             counter += 1
@@ -78,7 +87,7 @@ class monteNode:
             else:
                 print "ERROR. again. monte simulate. oops"
             return False
-        r = self.pickExploreNode()
+        r = self.pickExploreNode(nodeIndependentPlayerNr)
         if(self.children[r] == None):
             field = list(self.field)
             self.leaf = False
