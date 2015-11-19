@@ -1,2 +1,2 @@
 
-from tictactoeCoopRules import *
+from tictactoeRules import *
