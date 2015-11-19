@@ -101,6 +101,7 @@ def AIdist(AIs):
 
 r1 = Rules(1)
 
+"""
 NN = 90
 
 w1 = [random.random() for col in range(NN)]
@@ -143,6 +144,19 @@ output = EVOLUTION_BITCH(AIs,r1,30)
 print output[0].w
 print output[0].c
 print output[0].sigma
+"""
+NN = 90
+
+w1 = [random.random() for col in range(NN)]
+c1 = random.random()*5
+coopPlayer = montePlayerCoop(w1,c1,random.random(), 1, r1)
+store = -0.21342
+for itt in range(1000):
+    coopPlayer.root.explore(1)
+
+    if store != coopPlayer.root.bestCulmValOfTerminalChild:
+        store = coopPlayer.root.bestCulmValOfTerminalChild
+        print store
 
 """
 for ai in output:
@@ -154,5 +168,5 @@ for ai in output:
     print ai.sigma
 """
 
-print "Press any key to quit."
-input()
+print "Press the Enter key to quit."
+raw_input()
