@@ -101,59 +101,19 @@ def AIdist(AIs):
 
 r1 = Rules(1)
 
+
 NN = 90
 
 w1 = [random.random() for col in range(NN)]
-w2 = [random.random() for col in range(NN)]
-w3 = [random.random() for col in range(NN)]
-w4 = [random.random() for col in range(NN)]
-w5 = [random.random() for col in range(NN)]
-w6 = [random.random() for col in range(NN)]
-w7 = [random.random() for col in range(NN)]
-w8 = [random.random() for col in range(NN)]
-w9 = [random.random() for col in range(NN)]
-w10 = [random.random() for col in range(NN)]
-
 c1 = random.random()*5
-c2 = random.random()*5
-c3 = random.random()*5
-c4 = random.random()*5
-c5 = random.random()*5
-c6 = random.random()*5
-c10 = random.random()*5
-c9 = random.random()*5
-c7 = random.random()*5
-c8 = random.random()*5
+coopPlayer = montePlayerCoop(w1,c1,random.random(), 1, r1)
+store = -0.21342
+for itt in range(1000):
+    coopPlayer.root.explore(1)
 
-p1 = montePlayer(w1,c1,random.random(), 1, r1)
-p2 = montePlayer(w2,c2,random.random(), 1, r1)
-p3 = montePlayer(w3,c3,random.random(), 1, r1)
-p4 = montePlayer(w4,c4,random.random(), 1, r1)
-p5 = montePlayer(w5,c5,random.random(), 1, r1)
-p6 = montePlayer(w6,c6,random.random(), 1, r1)
-p7 = montePlayer(w7,c7,random.random(), 1, r1)
-p8 = montePlayer(w8,c8,random.random(), 1, r1)
-p9 = montePlayer(w9,c9,random.random(), 1, r1)
-p10 = montePlayer(w10,c10,random.random(), 1, r1)
-
-AIs = [p1,p2,p3,p4,p5,p6,p7,p8,p9,p10]
-
-output = EVOLUTION_BITCH(AIs,r1,30)
-
-print output[0].w
-print output[0].c
-print output[0].sigma
-
-
-"""
-for ai in output:
-    print ai.w
-print "\n"
-for ai in output:
-    print ai.c
-for ai in output:
-    print ai.sigma
-"""
+    if store != coopPlayer.root.bestCulmValOfTerminalChild:
+        store = coopPlayer.root.bestCulmValOfTerminalChild
+        print store
 
 print "Press the Enter key to quit."
 raw_input()
