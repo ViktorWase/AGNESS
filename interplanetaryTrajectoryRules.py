@@ -8,6 +8,13 @@ class Rules():
         It should be noted that this board
         game is sucky as a board game for humans.
         It complicated and really hard.
+
+        The simulation part is based on solving
+        Lambert's problem. (As of now it only deals
+        with max 1 revolutions and only prograde
+        orbits. Might change later.)
+        See the lambertsProblem.py-file for the
+        implementation (which is stolen from ESA.)
     """
     def __init__(self, playerNr):
         self.playerNr = playerNr
