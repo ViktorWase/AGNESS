@@ -274,9 +274,10 @@ def x2tof(tof, x, N, m_lambda):
 
     	tof = (x-m_lambda*z-d/y)/E
     	return tof
-
+"""
 (v1, v2) = lambert_problem([100.0, 0.0, 0.0], [0.0, 10000.0, 0.0], 100.0, 0.00001, 1, 1)
 print v1
 print v2
 print findDeltaV(v1[0], v2[0])
 print len(v1)
+"""
