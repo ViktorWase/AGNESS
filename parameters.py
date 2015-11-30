@@ -1,2 +1,3 @@
 
-from tictactoeCoopRules import *
+#from tictactoeCoopRules import *
+from interplanetaryTrajectoryRules import *

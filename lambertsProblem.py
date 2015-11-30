@@ -29,8 +29,13 @@ their PyKEP library, but using Python instead of C++.
  """
 
 from math import acos
+from math import asin
+from math import sinh
+from math import asinh
+from math import acosh
 from math import log
 from math import sqrt
+from math import sin
 
 def norm(vec):
     norm = 0.0
@@ -68,6 +73,9 @@ def lambert_problem(r1, r2, tof, mu, cw, multi_revs):
     M_PI = 3.14159265359
     m_r1=list(r1)
     m_r2=list(r2)
+    if tof<=0.0:
+        print "Faulty time input in Lambert"
+        return False
     m_tof=tof
     m_mu=mu
     m_has_converged=True
@@ -85,6 +93,9 @@ def lambert_problem(r1, r2, tof, mu, cw, multi_revs):
     #array3D ir1,ir2,ih,it1,it2;
     ir1 = normalizedCopy(r1)
     ir2 = normalizedCopy(r2)
+    #print "ir",
+    #print ir1,
+    #print ir2
     ih = crossProd(ir1,ir2)
     ih = normalizedCopy(ih)
     if (ih[2] == 0):
@@ -109,32 +120,42 @@ def lambert_problem(r1, r2, tof, mu, cw, multi_revs):
     	it2[0] = -it2[0]
         it2[1] = -it2[1]
         it2[2] = -it2[2]
-	lambda3 = m_lambda*lambda2
-	T = sqrt(2.0*m_mu/m_s/m_s/m_s) * m_tof
+    lambda3 = m_lambda*lambda2
 
-	# 2 - We now have lambda, T and we will find all x
-	# 2.1 - Let us first detect the maximum number of revolutions for which there exists a solution
-    m_Nmax = int(round(T/M_PI))
+    T = sqrt(2.0*m_mu/m_s/m_s/m_s) * m_tof
+    #print "hej2",
+    #print T,
+    #print m_mu,
+    #print m_tof
+    #print lambda3
+    # 2 - We now have lambda, T and we will find all x
+    # 2.1 - Let us first detect the maximum number of revolutions for which there exists a solution
+    m_Nmax = int((T/M_PI)) #Removed round(). FIX!
+    #print "m_Nmax:",
+    #print m_Nmax
+    #print lambda3
     T00 = acos(m_lambda) + m_lambda*sqrt(1.0-lambda2)
+    #print lambda3
     T0 = (T00 + m_Nmax*M_PI)
+    #print lambda3
     T1 = 2.0/3.0 * (1.0 - lambda3)
     DT = 0.0
     DDT = 0.0
     DDDT = 0.0
     if (m_Nmax > 0):
-            if (T < T0): # We use Halley iterations to find xM and TM
-			it=0
-			err = 1.0
-			T_min=T0
-			x_old=0.0
+        if (T < T0): # We use Halley iterations to find xM and TM
+            it=0
+            err = 1.0
+            T_min=T0
+            x_old=0.0
             x_new = 0.0
             while (True):
                 (DT,DDT,DDDT) = dTdx(x_old,T_min, m_lambda)
                 if (DT != 0.0):
                     x_new = x_old - DT * DDT / (DDT * DDT - DT * DDDT / 2.0)
-                    err=abs(x_old-x_new)
+                err=abs(x_old-x_new)
                 if ( (err<1e-13) or (it>12) ):
-					break
+                    break
                 T_min = x2tof(T_min,x_new,m_Nmax, m_lambda)
                 x_old=x_new
                 it+=1
@@ -156,9 +177,14 @@ def lambert_problem(r1, r2, tof, mu, cw, multi_revs):
     if (T>=T00):
         m_x[0] = -(T-T00)/(T-T00+4)
     elif (T<=T1):
+        #print "is zero? :",
+        #print (1-lambda2*lambda3)
+        #print lambda2
+        #print lambda3
+        #print T
         m_x[0] = T1*(T1-T) / ( 2.0/5.0*(1-lambda2*lambda3) * T ) + 1
     else:
-        m_x[0] = pow((T/T00),0.69314718055994529 / math.log(T1/T00)) - 1.0
+        m_x[0] = pow((T/T00),0.69314718055994529 / log(T1/T00)) - 1.0
 	# 3.1.2 Householder iterations
     (m_iters[0], m_x[0]) = householder(T, m_x[0], 0.0, 1e-5, 15, m_lambda)
 	# 3.2 multi rev solutions
@@ -169,7 +195,7 @@ def lambert_problem(r1, r2, tof, mu, cw, multi_revs):
             #3.2.1 left Householder iterations
             tmp = pow((i*M_PI+M_PI) / (8.0*T), 2.0/3.0)
             m_x[2*i-1] = (tmp-1)/(tmp+1)
-            m_iters[2*i-1] = householder(T, m_x[2*i-1], i, 1e-8, 15)
+            (m_iters[2*i-1], m_x[2*i-1]) = householder(T, m_x[2*i-1], i, 1e-8, 15, m_lambda)
             #3.2.1 right Householder iterations
             tmp = pow((8.0*T)/(i*M_PI), 2.0/3.0)
             m_x[2*i] = (tmp-1)/(tmp+1)
@@ -192,6 +218,23 @@ def lambert_problem(r1, r2, tof, mu, cw, multi_revs):
         for j in range(3):
             m_v2[i][j] = vr2 * ir2[j] + vt2 * it2[j]
     return (m_v1, m_v2);
+
+def x2tof2(tof, x, N, m_lambda):
+    a = 1.0/(1.0-x*x)
+    M_PI = 3.14159265359
+    if(a>0):
+        alfa = 2.0 * acos(x)
+        beta = 2.0 * asin(sqrt(m_lambda*m_lambda/a))
+        if(m_lambda < 0.0):
+            beta = -beta
+        tof = ((a*sqrt(a)*((alfa - sin(alfa))-(beta-sin(beta)) + 2.0*M_PI*N))/2.0)
+    else:
+        alfa = 2.0*acosh(x)
+        beta = 2.0*asinh(sqrt(-m_lambda*m_lambda/a))
+        if(m_lambda <0.0):
+            beta = -beta
+        tof = ( -a * sqrt (-a)* ( (beta - sinh(beta)) - (alfa - sinh(alfa)) ) / 2.0)
+    return tof
 
 def householder(T, x0,  N, eps, iter_max, m_lambda):
     it=0
@@ -248,29 +291,40 @@ def x2tof(tof, x, N, m_lambda):
     lagrange = 0.2
     dist = abs(x-1)
     if (dist < lagrange and dist > battin): # We use Lagrange tof expression
-    	tof = x2tof2(tof,x,N, m_lambda)
-    	return tof
+        #print "FUCKELINI!!!!!!"
+        tof = x2tof2(tof,x,N, m_lambda)
+        return tof
     K = m_lambda*m_lambda
     E = x*x-1.0
     rho = abs(E)
-    z = sqrt(1+K*E)
+    z = sqrt(1.0+K*E)
     if (dist < battin): # We use Battin series tof expression
-    	eta = z-m_lambda*x
-    	S1 = 0.5*(1.0-m_lambda-x*eta)
-    	Q = hypergeometricF(S1,1e-11)
-    	Q = 4.0/3.0*Q
-    	tof = (eta*eta*eta*Q+4.0*m_lambda*eta)/2.0 + N*M_PI / pow(rho,1.5)
-    	return tof
+        eta = z-m_lambda*x
+        S1 = 0.5*(1.0-m_lambda-x*eta)
+        Q = hypergeometricF(S1,1e-11)
+        Q = 4.0/3.0*Q
+        tof = (eta*eta*eta*Q+4.0*m_lambda*eta)/2.0 + N*M_PI / pow(rho,1.5)
+        return tof
     else: # We use Lancaster tof expresion
-    	y = sqrt(rho)
-    	g = x*z - m_lambda*E
-    	d = 0.0
-    	if (E<0):
-    		l = acos(g)
-    		d=N*M_PI+l
-    	else:
-    		f = y*(z-m_lambda*x)
-    		d=log(f+g)
+        y = sqrt(rho)
+        g = x*z - m_lambda*E
+        d = 0.0
+        #print E
+        if (E<0):
+            l = acos(g)
+            d=N*M_PI+l
+        else:
+            f = y*(z-m_lambda*x)
+            #print "-----1"
+            #print y
+            #print z
+            #print m_lambda
+            #print x
+            #print "-------"
+            #print E
+            #print f
+            #print g
+            d=log(f+g)
 
     	tof = (x-m_lambda*z-d/y)/E
     	return tof
