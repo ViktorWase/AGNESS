@@ -107,13 +107,23 @@ NN = 90
 w1 = [random.random() for col in range(NN)]
 c1 = random.random()*5
 coopPlayer = montePlayerCoop(w1,c1,random.random(), 1, r1)
-store = -0.21342
-for itt in range(1000):
+#store = -0.21342
+store = -1
+for itt in range(2000):
+    #print itt
     coopPlayer.root.explore(1)
 
     if store != coopPlayer.root.bestCulmValOfTerminalChild:
         store = coopPlayer.root.bestCulmValOfTerminalChild
-        print store
+        print "best delta-V:",
+        print (1.0/(store)-1.0)/100000.0*149597870700.0
+
+node = coopPlayer.root
+while(True):
+    print node.indexOfBestCulmValOfTerminalChild,
+    print (1.0/(node.bestCulmValOfTerminalChild)-1.0)/100000.0*149597870700.0
+    print node.field
+    node = node.children[node.indexOfBestCulmValOfTerminalChild]
 
 print "Press the Enter key to quit."
 raw_input()

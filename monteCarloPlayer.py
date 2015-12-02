@@ -100,6 +100,8 @@ class monteNode:
 
             self.children[r] = monteNode(self, list(field), newRules.playerNr, newRules, self.c, self.moveNr+1)
             w = self.children[r].simulateRandomGame(nodeIndependentPlayerNr)
+
+            #Shouldn't these start at self.children[r]? FIX!
             if(w == 1):
                 self.backPropagation(1)
             elif(w == -1):
@@ -315,7 +317,10 @@ class montePlayerCoop:
         self.w = list(w)
         self.c = float(c)
         self.sigma = sigma
+        #print len(self.root.children)
+        #print "hm"
         for i in range(len(self.root.children)):
+            #print i
             self.root.explore(self.playerNr)
 
     def setPlayerNr(self, playerNr):
@@ -398,6 +403,7 @@ class montePlayerCoop:
 
 class monteNodeCoop:
     def __init__(self, parent, field, playerNr, rules,c, moveNr, indexNr):
+        #print "start"
         self.parent = parent
         self.playerNr = playerNr
         self.field = list(field)
@@ -437,6 +443,8 @@ class monteNodeCoop:
         self.moveNr = moveNr
         self.children = [None]*len(rules.returnAllLegalMoves(field))
 
+        #print "end"
+
     def calcMeanAndVarOfChildren(self):
         li = []
         for child in self.children:
@@ -450,9 +458,8 @@ class monteNodeCoop:
 
     def pickExploreNode(self):
         counter = 0
-
         bestVal = -1
-        bestIndex = 0
+        bestIndex = -1
         totalSimulations = float(self.totalSimulations)
         counter = 0
         for child in self.children:
@@ -462,14 +469,16 @@ class monteNodeCoop:
             #This function HAS GOT TO CHANGE. It works and all, but could
             #probably be improved with an ANN or some GEP.
             #tmp = float(child.wins)/n+ self.c*sqrt(log(totalSimulations)/n)
-            tmp =random.random()# 1.0/(totalSimulations+1); #FIX!
+            tmp = random.random()# 1.0/(totalSimulations+1); #FIX!
 
             #Make the move that's best if it's your turn, otherwise you make the
             #move that's worst for you. (Minimax as it's called.)
-            if tmp >= bestVal:
+            if tmp >= bestVal and (child.leaf == False):
                 bestVal = tmp
                 bestIndex = counter
             counter += 1
+        if bestIndex == -1:
+            print "ERROR!"
         return bestIndex
 
     def explore(self, nodeIndependentPlayerNr):
@@ -495,8 +504,9 @@ class monteNodeCoop:
             self.children[r] = monteNodeCoop(self, list(field), newRules.playerNr, newRules, self.c, self.moveNr+1,r)
             if(self.children[r].rules.isOver(self.children[r].field)):
                 val = self.children[r].culmValue
-                self.backPropagation(val)
-                self.backPropagationOfTerminalNode(self.culmValue, self.indexNr)
+                self.children[r].backPropagation(val) #Changed these.
+                self.children[r].backPropagationOfTerminalNode(self.children[r].culmValue, self.indexNr)
+                self.children[r].leaf = True
             else:
                 val = self.children[r].simulateRandomGame(nodeIndependentPlayerNr)
                 self.backPropagation(val)
