@@ -37,6 +37,8 @@ class Rules():
         self.startTime = 0.0
 
     def returnAllLegalMoves(self, manouvers):
+        if(len(manouvers) == 1):
+            return  [0.1*i*self.orbitalPeriods[2]/(3600*24) for i in range(10)]
         if(manouvers[0] == 0):
             #An index for each time step.
             tmp = range(self.dt)
@@ -49,10 +51,11 @@ class Rules():
 
             #If we haven't gone anywhere we can't go to earth
             #can we? It's where we're at.
-            if len(manouvers) < 3:
+            if len(manouvers) < 4:
                 planetList.pop(2)
             else:
                 #Otherwise we simply remove the planet we're at.
+                #print manouvers[len(manouvers)-2]
                 planetList.pop(manouvers[len(manouvers)-2])
             return planetList
         else:
@@ -74,15 +77,16 @@ class Rules():
     def getNewBoard(self):
         return [0]
     def isOver(self, manouvers):
-        if (len(manouvers) % 2 == 1) and manouvers[len(manouvers)-1]==self.goalPlanet:
+        if (len(manouvers) % 2 == 0) and manouvers[len(manouvers)-1]==self.goalPlanet:
             return True
         else:
             return False
 
-    def calcCost(self, manouvers):
+    def calcCost(self, manouversIn):
         totalDeltaV = 0.0
+        manouvers = list(manouversIn)
+        currentTime = self.startTime+manouvers.pop(1)
         numOfMoves = (len(manouvers)-1)/2
-        currentTime = self.startTime
         currentTimeIndex = 1
         nextPlanetIndex = 2
         currentPlanet = self.startPlanet
@@ -140,6 +144,9 @@ class Rules():
 
     def makeMove(self, manouvers, n, player):
         self.manouvers = list(manouvers)
+        if len(self.manouvers)==1:
+            self.manouvers.append(n)
+            return list(self.manouvers)
         self.manouvers.append(n)
         if self.manouvers[0]==0:
             self.manouvers[0]=1

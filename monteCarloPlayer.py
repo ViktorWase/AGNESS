@@ -411,6 +411,10 @@ class monteNodeCoop:
         #self.wins = 0
         #self.losses = 0
 
+        #This is only true if ALL children and children's children and
+        #so on has been explored down to the terminal state.
+        self.exploredAllDescendants = False
+
         #The value of the node.
         self.value = 0
         #The variance of the values of the children. (Can only be
@@ -437,6 +441,7 @@ class monteNodeCoop:
         self.indexOfBestCulmValOfTerminalChild = -1
 
         self.leaf = True
+        self.isTerminal = False #Should be added to non-coop. FIX!
         self.c = c
         self.rules = copy(rules)
         self.rules.playerNr = playerNr #IIIIIIIIIINTE HELT HUNDRA P� DEN H�R RADEN!
@@ -469,17 +474,32 @@ class monteNodeCoop:
             #This function HAS GOT TO CHANGE. It works and all, but could
             #probably be improved with an ANN or some GEP.
             #tmp = float(child.wins)/n+ self.c*sqrt(log(totalSimulations)/n)
-            tmp = random.random()# 1.0/(totalSimulations+1); #FIX!
+            tmp =  1.0/(totalSimulations+1); #FIX!
 
             #Make the move that's best if it's your turn, otherwise you make the
             #move that's worst for you. (Minimax as it's called.)
-            if tmp >= bestVal and (child.leaf == False):
+            if tmp >= bestVal and (child.isTerminal == False) and (child.exploredAllDescendants==False):
                 bestVal = tmp
                 bestIndex = counter
             counter += 1
         if bestIndex == -1:
             print "ERROR!"
+            for child in self.children:
+                print child.field
         return bestIndex
+
+    def updateExploredAllDescendants(self):
+        """
+            This function updates to make sure that
+            Agness doesn't think beyond a terminal state.
+            It should be implemented in non-coop mode as well. FIX!
+        """
+        for child in self.children:
+            if child.exploredAllDescendants == False:
+                return
+        self.exploredAllDescendants = True
+        if(self.parent != None):
+            self.parent.updateExploredAllDescendants()
 
     def explore(self, nodeIndependentPlayerNr):
         if(len(self.children)==0):
@@ -490,8 +510,13 @@ class monteNodeCoop:
             if(self.parent != None and self.indexNr != -1):
                 #print self.field
                 self.parent.backPropagationOfTerminalNode(self.culmValue, self.indexNr)
+                self.exploredAllDescendants = True
+                self.parent.updateExploredAllDescendants()
             return
         r = self.pickExploreNode()
+        if r == -1:
+            self.exploredAllDescendants = True
+            self.parent.updateExploredAllDescendants()
         if(self.children[r] == None):
             field = list(self.field)
             self.leaf = False
@@ -506,7 +531,7 @@ class monteNodeCoop:
                 val = self.children[r].culmValue
                 self.children[r].backPropagation(val) #Changed these.
                 self.children[r].backPropagationOfTerminalNode(self.children[r].culmValue, self.indexNr)
-                self.children[r].leaf = True
+                self.children[r].isTerminal = True
             else:
                 val = self.children[r].simulateRandomGame(nodeIndependentPlayerNr)
                 self.backPropagation(val)
@@ -514,6 +539,8 @@ class monteNodeCoop:
             self.children[r].explore(nodeIndependentPlayerNr)
 
     def backPropagationOfTerminalNode(self, culmVal, indexNr):
+        print "Reached a terminal state:", #remove this.
+        print culmVal
         if culmVal>self.bestCulmValOfTerminalChild:
             self.bestCulmValOfTerminalChild = culmVal
             self.indexOfBestCulmValOfTerminalChild = indexNr
