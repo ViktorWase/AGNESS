@@ -1,5 +1,6 @@
 from lambertsProblem import lambert_problem
 from positionOfPlanets import planetPosition
+from positionOfPlanets import planetVelocity
 
 class Rules():
     """
@@ -82,6 +83,14 @@ class Rules():
         else:
             return False
 
+    def calcDeltaV_2(self, v01, v02, v11, v12, planetVel0, planetVel1, perihelion):
+        """
+        Source:
+        http://www.esa.int/gsp/ACT/doc/MAD/pub/ACT-RPR-MAD-2007-(JOGO)SearchSpacePruningAndGlobalOptimisation.pdf
+        """
+        a_1_in = 1.0/(v)
+        deltaV = sqrt(1.0/a_1_in + 2.0/perihelion) - sqrt(1.0/a_1_out+2.0/perihelion)
+        return abs(deltaV)
     def calcCost(self, manouversIn):
         totalDeltaV = 0.0
         manouvers = list(manouversIn)
@@ -93,6 +102,23 @@ class Rules():
         v2_old = [0.0, 0.0, 0.0]
         #print "manouvers: ",
         #print manouvers
+        manouvers.pop(0)
+        tofList = [-1]*numOfMoves
+        planetMoveList = [-1]*numOfMoves
+        for it in xrange(numOfMoves*2):
+            if it%2==0:
+                tofList[it/2] = manouvers[it]
+            else:
+                planetMoveList[(it-1)/2] = manouvers[it]
+        p0 = 2
+        for legNr in range(numOfMoves-1):
+            #Go through each pair of legs and match the speeds between them.
+            p1 = planetMoveList[legNr]
+            planetVel0 = planetVelocity(p0, currentTime)
+            planetVel1 = planetVelocity(p0, currentTime+tofList[legNr])
+
+
+        """
         for moveNr in range(numOfMoves):
             #print "MoveNr:",
             #print moveNr
@@ -110,7 +136,8 @@ class Rules():
             #print timeOfFlight
             mu = 1.32712440018*pow(10,20)/(pow(149597870700.0,3))
             #print mu
-            (v1, v2) = self.lambertSolver(r1,r2,timeOfFlight,mu) #The last one isn't right. FIX!
+            v_planet = planetVelocity(manouvers[nextPlanetIndex], currentTime)
+            (v1, v2) = self.lambertSolver(r1,r2,timeOfFlight,mu)
             totalDeltaV += self.calcDeltaV(v2_old, v1)
             v2_old = v2
             currentTime += timeOfFlight
@@ -119,6 +146,7 @@ class Rules():
             currentTimeIndex += 2
         #print "val:",
         #print 1.0/(1.0+100000*totalDeltaV)
+        """
         return 1.0/(1.0+100000*totalDeltaV)
 
 

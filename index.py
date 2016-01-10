@@ -110,6 +110,8 @@ coopPlayer = montePlayerCoop(w1,c1,random.random(), 1, r1)
 #store = -0.21342
 store = -1
 for itt in range(2000):
+    if itt % 100 == 0:
+        print itt
     #print itt
     coopPlayer.root.explore(1)
 

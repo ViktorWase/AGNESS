@@ -102,7 +102,7 @@ def lambert_problem(r1, r2, tof, mu, cw, multi_revs):
         print "The angular momentum vector has no z component, impossible to define automatically clock or counterclockwise"
     lambda2 = 1.0 - m_c/m_s
     m_lambda = sqrt(lambda2);
-    if (ih[2] < 0.0): # Transfer angle is larger than 180 degrees as seen from abive the z axis
+    if (ih[2] < 0.0): # Transfer angle is larger than 180 degrees as seen from above the z axis
         m_lambda = -m_lambda
         it1 = crossProd(ir1,ih)
         it2 = crossProd(ir2,ih)
